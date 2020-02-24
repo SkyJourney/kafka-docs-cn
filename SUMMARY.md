@@ -13,23 +13,23 @@
 
 ## 配置 CONFIGURATION
 
-* [Untitled](pei-zhi-configuration/untitled.md)
+* [Untitled](configuration/untitled.md)
 
 ## 设计 DESIGN
 
-* [Untitled](she-ji-design/untitled.md)
+* [Untitled](design/untitled.md)
 
 ## 实现 IMPLEMENTATION
 
-* [Untitled](shi-xian-implementation/untitled.md)
+* [Untitled](implementation/untitled.md)
 
 ## 操作 OPERATIONS
 
-* [Untitled](cao-zuo-operations/untitled.md)
+* [Untitled](operations/untitled.md)
 
 ## 安全 SECURITY
 
-* [Untitled](an-quan-security/untitled.md)
+* [Untitled](security/untitled.md)
 
 ## KAFKA CONNECT
 
