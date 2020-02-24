@@ -117,7 +117,7 @@
 
 `Kafka`做得更好。通过主题中具有并行性（即分区）的概念，`Kafka`能够在消费者进程池中提供顺序保证和负载均衡。这是通过将主题中的分区分配给消费者组中的消费者来实现的，这使得每个分区会被组中的某个特定消费者完全消费。通过这样的方式确保了消费者仅仅是该分区的唯一读取器，并按照顺序消费数据。由于存在很多分区，因此这种做法也可以平衡许多消费者实例上的负载。但请注意，消费者组中的实例不能超过分区。
 
-## 作为储存系统 Kafka as a Storage System <a id="storage-system"></a>
+## 作为存储系统 Kafka as a Storage System <a id="storage-system"></a>
 
 Any message queue that allows publishing messages decoupled from consuming them is effectively acting as a storage system for the in-flight messages. What is different about Kafka is that it is a very good storage system.
 
@@ -162,5 +162,5 @@ For more information on the guarantees, APIs, and capabilities Kafka provides se
 [consumer]: ../
 [streams]: ../
 [connector]: ../
-[security]: ../security/untitled
-[design]: ../design/untitled
+[security]: ../security/untitled/
+[design]: ../design/untitled/
