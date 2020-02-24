@@ -1,6 +1,6 @@
 # 关于本书 About
 
-## Apache Kafka 官方文档中文版 <a id="apache-kafka-&#x5B98;&#x65B9;&#x6587;&#x6863;&#x4E2D;&#x6587;&#x7248;"></a>
+## Apache Kafka 官方文档中文版 <a id="apache-kafka-docs-cn"></a>
 
 `Apache Kafka`是一个高吞吐量分布式消息系统，用`Scala`开发，当前版本`2.4`。
 
