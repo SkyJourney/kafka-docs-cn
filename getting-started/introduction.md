@@ -23,7 +23,7 @@
 
 `Kafka`有四大核心`APIs`：
 
-![1-1 &#x6838;&#x5FC3;APIs&#x793A;&#x610F;&#x56FE;](../.gitbook/assets/kafka-apis.png)
+![1-1 核心APIs示意图](../.gitbook/assets/kafka-apis.png)
 
 
 * `Producer API`（生产者）允许应用程序发布数据记录流到一个或多个`Kafka topics`中
