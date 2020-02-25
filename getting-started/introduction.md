@@ -89,7 +89,9 @@
 
 ## 多租户 Multi-tenancy <a id="multi-tenancy"></a>
 
-你能够用多租户方案来部署`Kafka`。通过配置哪些主题能生产或消费数据来开启多租户模式。配额也会有运营支持。管理员可以在请求上定义和实施配额以控制客户端使用的代理资源。更多信息可以查看[安全][security]章节。
+你能够用多租户方案来部署`Kafka`。通过配置哪些主题能生产或消费数据来开启多租户模式。配额也会有运营支持。管理员可以在请求上定义和实施配额以控制客户端使用的代理资源。
+
+更多信息可以查看[安全][security]章节。
 
 ## 保证 Guarantees <a id="guarantees"></a>
 
@@ -119,48 +121,50 @@
 
 ## 作为存储系统 Kafka as a Storage System <a id="storage-system"></a>
 
-Any message queue that allows publishing messages decoupled from consuming them is effectively acting as a storage system for the in-flight messages. What is different about Kafka is that it is a very good storage system.
+任何允许发布与消费无关的消息队列都有效地充当了运行中的消息存储系统。`Kafka`的不同之处在于它是一个非常好的存储系统。
 
-Data written to Kafka is written to disk and replicated for fault-tolerance. Kafka allows producers to wait on acknowledgement so that a write isn't considered complete until it is fully replicated and guaranteed to persist even if the server written to fails.
+写入`Kafka`中的数据将写入磁盘并复制以实现容错能力。`Kafka`允许生产者等待确认，因此直到数据被完全复制并保证即使服务器写入失败依然可以保留时才会被认为写入完成。
 
-The disk structures Kafka uses scale well—Kafka will perform the same whether you have 50 KB or 50 TB of persistent data on the server.
+`Kafka`的磁盘结构可以进行很好的扩展。无论服务器上保留有50KB还是50TB的持久数据，`Kafka`都可以表现出同样的性能。
 
-As a result of taking storage seriously and allowing the clients to control their read position, you can think of Kafka as a kind of special purpose distributed filesystem dedicated to high-performance, low-latency commit log storage, replication, and propagation.
+认真对待存储并允许客户端控制其读取位置的结果是，可以将`Kafka`视为一种专用于高性能、低延迟的提交日志存储、复制和传播的专用分布式文件系统。
 
-For details about the Kafka's commit log storage and replication design, please read this page.
+更多信息可以查看[设计][design]章节。
 
-Kafka for Stream Processing
-It isn't enough to just read, write, and store streams of data, the purpose is to enable real-time processing of streams.
+## 用于流处理 Kafka for Stream Processing <a id="stream-processing"></a>
 
-In Kafka a stream processor is anything that takes continual streams of data from input topics, performs some processing on this input, and produces continual streams of data to output topics.
+仅读取，写入和存储数据流是不够的，`Kafka`的用途之一是实现对流的实时处理。
 
-For example, a retail application might take in input streams of sales and shipments, and output a stream of reorders and price adjustments computed off this data.
+在`Kafka`中，流处理器是指从输入主题中获取连续数据流，对该输入进行一些处理并生成连续数据流以输出主题的总和。
 
-It is possible to do simple processing directly using the producer and consumer APIs. However for more complex transformations Kafka provides a fully integrated Streams API. This allows building applications that do non-trivial processing that compute aggregations off of streams or join streams together.
+例如，一个零售应用程序可以获取销售和运输的输入流并输出根据这些数据计算得出的重新订购和价格调整的流。
 
-This facility helps solve the hard problems this type of application faces: handling out-of-order data, reprocessing input as code changes, performing stateful computations, etc.
+用生产者`API`和消费者`API`可以直接进行简单的数据处理。但是对于更复杂的转换，`Kafka`提供了非常综合的流处理`API`。这套`API`允许构建执行非重要处理的应用程序，这些应用程序可以计算流的聚合或将流连接在一起。
 
-The streams API builds on the core primitives Kafka provides: it uses the producer and consumer APIs for input, uses Kafka for stateful storage, and uses the same group mechanism for fault tolerance among the stream processor instances.
+该功能有助于解决此类应用程序所面临的难题：处理无序数据，在代码更改时重新处理输入，执行状态计算等。
 
-Putting the Pieces Together
-This combination of messaging, storage, and stream processing may seem unusual but it is essential to Kafka's role as a streaming platform.
+流处理`API`建立在`Kafka`提供的核心原语之上：其使用生产者`API`和消费者`API`进行输入，用`Kafka`进行状态存储，用同组机制来实现流处理器实例之间的容错。
 
-A distributed file system like HDFS allows storing static files for batch processing. Effectively a system like this allows storing and processing historical data from the past.
+## 将这些合在一起 Putting the Pieces Together <a id="together"></a>
 
-A traditional enterprise messaging system allows processing future messages that will arrive after you subscribe. Applications built in this way process future data as it arrives.
+将消息传递、存储和流处理结合在一起看上去并不寻常，但是这是对于`Kafka`作为流平台中的角色至关重要。
 
-Kafka combines both of these capabilities, and the combination is critical both for Kafka usage as a platform for streaming applications as well as for streaming data pipelines.
+像`HDFS`这样的分布式文件系统运行存储静态文件以进行批处理。实际上，像这样的系统也可以存储和处理过去的历史数据。
 
-By combining storage and low-latency subscriptions, streaming applications can treat both past and future data the same way. That is a single application can process historical, stored data but rather than ending when it reaches the last record it can keep processing as future data arrives. This is a generalized notion of stream processing that subsumes batch processing as well as message-driven applications.
+传统的商业消息传递系统允许处理订阅之后传递来的“将来”的消息。用这种方式构建的应用程序会在将来的数据送达是进行处理。
 
-Likewise for streaming data pipelines the combination of subscription to real-time events make it possible to use Kafka for very low-latency pipelines; but the ability to store data reliably make it possible to use it for critical data where the delivery of data must be guaranteed or for integration with offline systems that load data only periodically or may go down for extended periods of time for maintenance. The stream processing facilities make it possible to transform data as it arrives.
+`Kafka`将这两种特性结合，对于将`Kafka`用作流应用程序平台和流数据管道平台而言，这种结合至关重要。
 
-For more information on the guarantees, APIs, and capabilities Kafka provides see the rest of the documentation.
+通过结合存储和低延迟订阅，流应用程序可以以先相同的方式处理过去和将来的数据。也就是说一个单独的应用程序可以处理历史存储的数据，但并不是到最后一条记录为止，它可以继续处理将来送达的数据。这是流处理的通用概念，它包括了批处理以及消息驱动应用程序。
+
+同样地，对于流数据管道，这种对实时事件订阅的组合使其可以将`Kafka`用于非常低延迟的管道，但是可靠的存储数据能力使其可以用于必须保证数据送达的关键数据，或用于仅定期加载数据或可能停机很长时间进行维护的脱机系统集成。流处理特性让数据送达时进行转换成为可能。
+
+对于更多关于`Kafka`的信息，请继续阅读文档后续的章节。
 
 [multi-languages]: https://cwiki.apache.org/confluence/display/KAFKA/Clients
 [producer]: ../
 [consumer]: ../
 [streams]: ../
 [connector]: ../
-[security]: ../security/untitled/
-[design]: ../design/untitled/
+[security]: ../security/untitled.md
+[design]: ../design/untitled.md

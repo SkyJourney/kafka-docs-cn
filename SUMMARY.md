@@ -6,6 +6,7 @@
 ## 入门 GETTING STARTED <a id="getting-started"></a>
 
 * [简介 Introduction](getting-started/introduction.md)
+* [用例示范 Use Cases](getting-started/use-cases.md)
 
 ## APIs
 
