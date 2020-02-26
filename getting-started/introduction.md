@@ -1,6 +1,6 @@
-# 简介 Introduction
+# 1.1 简介 Introduction
 
-`Apache Kafka®` 是一个分布式流平台。这到底是什么意思呢？
+`Apache Kafka®`是一个分布式流平台。这到底是什么意思呢？
 
  流平台具有三个关键功能：
 

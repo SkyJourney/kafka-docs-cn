@@ -1,28 +1,38 @@
-# 用例示范 Use Cases
+# 1.2 用例示范 Use Cases
 
-Here is a description of a few of the popular use cases for Apache Kafka®. For an overview of a number of these areas in action, see this blog post.
+本节是对`Apache Kafka®`的一些流行用例的描述。有关这些领域的概述，请参阅[此篇博客](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying/)。
 
-## Messaging
-Kafka works well as a replacement for a more traditional message broker. Message brokers are used for a variety of reasons (to decouple processing from data producers, to buffer unprocessed messages, etc). In comparison to most messaging systems Kafka has better throughput, built-in partitioning, replication, and fault-tolerance which makes it a good solution for large scale message processing applications.
-In our experience messaging uses are often comparatively low-throughput, but may require low end-to-end latency and often depend on the strong durability guarantees Kafka provides.
+## 消息传递 Messaging <a id="messaging"></a>
 
-In this domain Kafka is comparable to traditional messaging systems such as ActiveMQ or RabbitMQ.
+`Kafka`可以很好地替代传统消息代理。消息代理的使用有多种原因（将处理与数据生产者解耦，缓冲未处理的消息等）。与大多数消息传递系统相比，`Kafka`具有更好的吞吐量，内置分区机制，复制模型和容错能力，这使其成为大规模消息处理应用程序的理想解决方案。
 
-## Website Activity Tracking
-The original use case for Kafka was to be able to rebuild a user activity tracking pipeline as a set of real-time publish-subscribe feeds. This means site activity (page views, searches, or other actions users may take) is published to central topics with one topic per activity type. These feeds are available for subscription for a range of use cases including real-time processing, real-time monitoring, and loading into Hadoop or offline data warehousing systems for offline processing and reporting.
-Activity tracking is often very high volume as many activity messages are generated for each user page view.
+根据我们的经验，消息传递的使用通常吞吐量较低，但是可能需要较低的端到端延迟，并且通常取决于Kafka提供的强大的持久性保证。
 
-## Metrics
-Kafka is often used for operational monitoring data. This involves aggregating statistics from distributed applications to produce centralized feeds of operational data.
+在这个领域，`Kafka`与`ActiveMQ`或`RabbitMQ`等传统消息传递系统相当。
 
-## Log Aggregation
-Many people use Kafka as a replacement for a log aggregation solution. Log aggregation typically collects physical log files off servers and puts them in a central place (a file server or HDFS perhaps) for processing. Kafka abstracts away the details of files and gives a cleaner abstraction of log or event data as a stream of messages. This allows for lower-latency processing and easier support for multiple data sources and distributed data consumption. In comparison to log-centric systems like Scribe or Flume, Kafka offers equally good performance, stronger durability guarantees due to replication, and much lower end-to-end latency.
+## 网站活动追踪 Website Activity Tracking <a id="website-activity-tracking"></a>
 
-## Stream Processing
-Many users of Kafka process data in processing pipelines consisting of multiple stages, where raw input data is consumed from Kafka topics and then aggregated, enriched, or otherwise transformed into new topics for further consumption or follow-up processing. For example, a processing pipeline for recommending news articles might crawl article content from RSS feeds and publish it to an "articles" topic; further processing might normalize or deduplicate this content and publish the cleansed article content to a new topic; a final processing stage might attempt to recommend this content to users. Such processing pipelines create graphs of real-time data flows based on the individual topics. Starting in 0.10.0.0, a light-weight but powerful stream processing library called Kafka Streams is available in Apache Kafka to perform such data processing as described above. Apart from Kafka Streams, alternative open source stream processing tools include Apache Storm and Apache Samza.
+`Kafka`最初的用例是能够将用户活动追踪管道重建为一组实时的发布-订阅源。这意味着站点活动（页面访问，查询或其他用户可能采取的活动）会被发布到中心主题群中，其中每种活动对应一个主题。这些消息源可用于一系列用例的订阅，包括实时处理，实时监控，以及加载到`Hadoop`或离线数据仓库系统中以进行离线处理和报告。
 
-## Event Sourcing
-Event sourcing is a style of application design where state changes are logged as a time-ordered sequence of records. Kafka's support for very large stored log data makes it an excellent backend for an application built in this style.
+活动跟踪通常容量很大，因为每个用户页面视图都会生成许多活动消息。
 
-## Commit Log
-Kafka can serve as a kind of external commit-log for a distributed system. The log helps replicate data between nodes and acts as a re-syncing mechanism for failed nodes to restore their data. The log compaction feature in Kafka helps support this usage. In this usage Kafka is similar to Apache BookKeeper project.
+## 监控 Metrics
+
+`Kafka`通常用于操作监控数据。这涉及汇总来自分布式应用程序的统计信息，以生成集中的运行数据源。
+
+## 日志聚合 Log Aggregation
+
+许多人使用`Kafka`代替日志聚合解决方案。日志聚合通常从服务器中收集物理日志文件，然后将他们放在一个中央位置（也许是文件服务器或者`HDFS`）来进行处理。`Kafka`抽取文件的详细信息，并将日志或事件数据作为消息流进行更清晰的抽象。这允许较低延迟的处理，并且更容易支持多个数据源和分布式数据消费。与以日志为中心的系统（如`Scribe`或`Flume`）相比，`Kafka`具有同样优秀的性能，因复制机制而提供更强大的持久性保证，以及更低的端对端延迟。
+
+## 流处理 Stream Processing
+
+`Kafka`的许多用户在有多个阶段组成的处理管道中处理数据，其源输入数据从`Kafka`主题中消费，然后进行聚合，完善，或以其他方式转换为新主题供进一步消费或后续处理。例如用于推荐新闻文章的处理管道可能会从`RSS`源中抓取文章内容，然后发布到`articles`主题中；进一步处理可能会将文章内容规范化或去重，并将净化过的文章内容发布到一个新主题中；最后一步处理可能尝试给用户推荐这些内容。这样的处理管道基于各个独立的主题创建实时数据的流式图。从`0.10.0.0`版本开始，`Apache Kafka`中提供了一个轻量但功能强大的流处理库，称为`Kafka Streams`，可以执行上述的数据处理。除了`Kafka Streams`，其他开源的流处理工具还包括`Apache Storm`和`Apache Samza`。
+
+
+## 事件获取 Event Sourcing
+
+事件获取是一种应用程序设计风格，指状态更改以数据记录的时间顺序被日志记录。 `Kafka`对大量存储的日志数据的支持使其成为使用这种样式构建的应用程序的绝佳后端。
+
+## 提交日志 Commit Log
+
+`Kafka`可以用作分布式系统的一种外部提交日志。该日志有助于在节点之间复制数据，并充当故障节点恢复其数据的重新同步机制。 `Kafka`中的日志压缩功能能更好的支持此用法。在这种用法中，`Kafka`与`Apache BookKeeper`项目相似。
