@@ -1,4 +1,4 @@
-# 1.3 快速开始 Quick Start
+# 1.3 快速入门 Quick Start
 
 该教程假定读者是从头开始，并且没有现有的`Kafka`或`ZooKeeper`数据。`Kafka`控制台脚本在基于`Unix`的平台和`Windows`平台有所出入，因此在`Windows`平台使用`bin\windows\`而不是`bin/`，并且脚本扩展名改为`.bat`。
 
@@ -123,129 +123,134 @@ Topic:my-replicated-topic   PartitionCount:1    ReplicationFactor:3 Configs:
     Topic: my-replicated-topic  Partition: 0    Leader: 1   Replicas: 1,2,0 Isr: 1,2,0
 ```
 
+解释一下输出信息。第一行给出所有分区的摘要，附加的每一行提供一个分区的详细信息。由于我们的主题只有一个分区，所有只有一行附加。
 
+* `leader`是负责给定分区的所有读写操作的节点。每个节点都会成为随机选择的部分分区的`leader`。
+* `replicas`是为该分区复制日志的节点列表，不管它们是否是`leader`或是否当前处于活动状态。
+* `isr`是`in-sync`（同步中）副本的集合。这是副本列表的子集，列出当前仍处于活动状态且与`leader`保持同步的节点。
 
-Here is an explanation of output. The first line gives a summary of all the partitions, each additional line gives information about one partition. Since we have only one partition for this topic there is only one line.
+注意在本例当中节点`1`是主题的唯一分区的`leader`。
 
-"leader" is the node responsible for all reads and writes for the given partition. Each node will be the leader for a randomly selected portion of the partitions.
-"replicas" is the list of nodes that replicate the log for this partition regardless of whether they are the leader or even if they are currently alive.
-"isr" is the set of "in-sync" replicas. This is the subset of the replicas list that is currently alive and caught-up to the leader.
-Note that in my example node 1 is the leader for the only partition of the topic.
+我们可以在创建的原始主题上运行相同的命令来查看其位置：
 
-We can run the same command on the original topic we created to see where it is:
-
-1
-2
-3
+```bash
 > bin/kafka-topics.sh --describe --bootstrap-server localhost:9092 --topic test
 Topic:test  PartitionCount:1    ReplicationFactor:1 Configs:
     Topic: test Partition: 0    Leader: 0   Replicas: 0 Isr: 0
-So there is no surprise there—the original topic has no replicas and is on server 0, the only server in our cluster when we created it.
+```
 
-Let's publish a few messages to our new topic:
+因此没有什么意外，原始主题没有副本，只位于集群中唯一创建的服务器`0`。
 
-1
-2
-3
-4
-5
+我们发布一些消息到新主题中：
+
+```bash
 > bin/kafka-console-producer.sh --broker-list localhost:9092 --topic my-replicated-topic
 ...
 my test message 1
 my test message 2
 ^C
+```
+
+现在我们来消费这些消息：
 Now let's consume these messages:
 
-1
-2
-3
-4
-5
+```bash
 > bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic
 ...
 my test message 1
 my test message 2
 ^C
-Now let's test out fault-tolerance. Broker 1 was acting as the leader so let's kill it:
+```
 
-1
-2
-3
+此时，我们来测试一下容错能力。代理`1`正充当`leader`角色，因此我们关掉它：
+
+```bash
 > ps aux | grep server-1.properties
 7564 ttys002    0:15.91 /System/Library/Frameworks/JavaVM.framework/Versions/1.8/Home/bin/java...
 > kill -9 7564
-On Windows use:
-1
-2
-3
-4
+```
+
+`Windows`中操作：
+
+```bash
 > wmic process where "caption = 'java.exe' and commandline like '%server-1.properties%'" get processid
 ProcessId
 6016
 > taskkill /pid 6016 /f
-Leadership has switched to one of the followers and node 1 is no longer in the in-sync replica set:
+```
 
-1
-2
-3
+`leader`已切换到`floowers`之一，且节点`1`不再显示在同步副本的列表中：
+
+```bash
 > bin/kafka-topics.sh --describe --bootstrap-server localhost:9092 --topic my-replicated-topic
 Topic:my-replicated-topic   PartitionCount:1    ReplicationFactor:3 Configs:
     Topic: my-replicated-topic  Partition: 0    Leader: 2   Replicas: 1,2,0 Isr: 2,0
-But the messages are still available for consumption even though the leader that took the writes originally is down:
+```
 
-1
-2
-3
-4
-5
+但是即使最初写入的leader已经下线，消息任何可以使用：
+
+```bash
 > bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic
 ...
 my test message 1
 my test message 2
 ^C
-Step 7: Use Kafka Connect to import/export data
-Writing data from the console and writing it back to the console is a convenient place to start, but you'll probably want to use data from other sources or export data from Kafka to other systems. For many systems, instead of writing custom integration code you can use Kafka Connect to import or export data.
+```
 
-Kafka Connect is a tool included with Kafka that imports and exports data to Kafka. It is an extensible tool that runs connectors, which implement the custom logic for interacting with an external system. In this quickstart we'll see how to run Kafka Connect with simple connectors that import data from a file to a Kafka topic and export data from a Kafka topic to a file.
+## 步骤7：用 Kafka Connect 导入/导出数据 Use Kafka Connect to import/export data <a id="connect-import-export-data"></a>
 
-First, we'll start by creating some seed data to test with:
+从控制台输入数据再写回到控制台是非常方便的起点，但是你可能要从其他来源使用数据或从Kafka导出的数据到其他系统。对于许多系统来说，可以用`Kafka Connect`导入或导出数据，无需编写自定义的整合代码。
 
-1
+`Kafka Connect`是`Kafka`自带的用于将数据导入和导出到`Kafka`的工具。它是运行连接器（`connector`）的扩展工具，其可以实现于外部系统交互的自定义逻辑。在`快速入门`即本篇文章中，我们将看到如何使用简单的连接器运行`Kafka Connect`，并用其从文件导入数据到`Kafka`主题中，并从`Kafka`主题中导出数据到文件。
+
+首先，我们将从创建一些种子数据开始进行测试：
+
+```bash
 > echo -e "foo\nbar" > test.txt
-Or on Windows:
-1
-2
+```
+
+在Windows中操作：
+
+```bash
 > echo foo> test.txt
 > echo bar>> test.txt
-Next, we'll start two connectors running in standalone mode, which means they run in a single, local, dedicated process. We provide three configuration files as parameters. The first is always the configuration for the Kafka Connect process, containing common configuration such as the Kafka brokers to connect to and the serialization format for data. The remaining configuration files each specify a connector to create. These files include a unique connector name, the connector class to instantiate, and any other configuration required by the connector.
+```
 
-1
+紧接着，我们将启动两个独立模式运行的连接器，也就是说他们各自运行在本地独立专用的进程中。我们提供三个配置文件作为参数。第一个始终是`Kafka Connect`进程的配置，包括通用配置，如要连接的`Kafka`代理和数据的序列化格式。其余的配置文件均指定要创建的连接器。 这些文件包括唯一的连接器名称、要实例化的连接器类以及连接器所需的任何其他配置。
+
+```bash
 > bin/connect-standalone.sh config/connect-standalone.properties config/connect-file-source.properties config/connect-file-sink.properties
-These sample configuration files, included with Kafka, use the default local cluster configuration you started earlier and create two connectors: the first is a source connector that reads lines from an input file and produces each to a Kafka topic and the second is a sink connector that reads messages from a Kafka topic and produces each as a line in an output file.
+```
 
-During startup you'll see a number of log messages, including some indicating that the connectors are being instantiated. Once the Kafka Connect process has started, the source connector should start reading lines from test.txt and producing them to the topic connect-test, and the sink connector should start reading messages from the topic connect-test and write them to the file test.sink.txt. We can verify the data has been delivered through the entire pipeline by examining the contents of the output file:
+这些随`Kafka`附赠的样本配置文件使用之前启动的默认本地集群配置并创建两个连接器：第一个是源连机器，能够从输入文件读取行数据并将每一行生成为`Kafka`主题中的信息；第二个是接受连接器，能够从`Kafka`主题中读取信息并将每条信息在输出文件中生成一行数据。
 
-1
-2
-3
+在启动过程中，你将看到许多日志信息，其中包括一些标明正在实例化连接器的日志。一旦`Kafka Connect`进程启动完毕，源连接器就应该开始从`test.txt`文件中读取行数据，并将他们转换生成到主题`connect-test`中。然后接收连接器应该开始从主题`connect-test`读取信息，并写入他们到文件`test.sink.txt`中。我们可以我们可以通过检查输出文件的内容来验证数据是否已通过整个管道传递：
+
+```bash
 > more test.sink.txt
 foo
 bar
-Note that the data is being stored in the Kafka topic connect-test, so we can also run a console consumer to see the data in the topic (or use custom consumer code to process it):
+```
 
-1
-2
-3
-4
+注意数据是被存储在主题`connect-test`中，因此我们也能启动控制台消费者来查看在主题中的数据（或者使用自定义的消费者代码去处理它）：
+
+```bash
 > bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic connect-test --from-beginning
 {"schema":{"type":"string","optional":false},"payload":"foo"}
 {"schema":{"type":"string","optional":false},"payload":"bar"}
 ...
+```
+
+连接器会继续处理数据，因此我们可以将数据添加到文件中，并查看它在管道中的移动情况：
+
 The connectors continue to process data, so we can add data to the file and see it move through the pipeline:
 
-1
+```bash
 > echo Another line>> test.txt
-You should see the line appear in the console consumer output and in the sink file.
+```
 
-Step 8: Use Kafka Streams to process data
-Kafka Streams is a client library for building mission-critical real-time applications and microservices, where the input and/or output data is stored in Kafka clusters. Kafka Streams combines the simplicity of writing and deploying standard Java and Scala applications on the client side with the benefits of Kafka's server-side cluster technology to make these applications highly scalable, elastic, fault-tolerant, distributed, and much more. This quickstart example will demonstrate how to run a streaming application coded in this library.
+您应该看到该行出现在控制台使用者输出和接收器文件中。
+
+## 步骤8：用 Kafka Streams 处理数据 Use Kafka Streams to process data  <a id="streams-process-data"></a>
+
+`Kafka Streams`是用于构建关键任务实时应用程序和微服务的客户端库，其中输入和/或输出数据存储在`Kafka`集群中。 `Kafka Streams`结合了在客户端编写和部署标准Java和Scala应用程序的简便性以及`Kafka`服务器端集群技术的优势，使这些应用程序具有高度可伸缩性，弹性，容错性，分布式等特性。此[快速入门示例](../kafka-streams/quick-start.md)将演示如何运行此库中编码的流应用程序。

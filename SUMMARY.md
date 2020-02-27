@@ -7,7 +7,9 @@
 
 * [简介 Introduction](./getting-started/introduction.md)
 * [用例示范 Use Cases](./getting-started/use-cases.md)
-* [快速开始 Quick Start](./getting-started/quick-start.md)
+* [快速入门 Quick Start](./getting-started/quick-start.md)
+* [生态系统 Ecosystem](./getting-started/ecosystem.md)
+* [升级日志 Upgrading From Previous Versions](./getting-started/upgrading.md)
 
 ## APIs
 
