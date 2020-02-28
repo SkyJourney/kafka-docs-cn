@@ -168,3 +168,4 @@
 [connector]: ../apis/connect-api.md
 [security]: ../security/security-overview.md
 [design]: ../design/motivation.md
+[test]: http://www.baidu.com

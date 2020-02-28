@@ -14,6 +14,9 @@
 ## APIs
 
 * [生产者 API Producer API](./apis/producer-api.md)
+* [消费者 API Consumer API](./apis/consumer-api.md)
+* [流处理 API Streams API](./apis/streams-api.md)
+* [连接器 API Connect API](./apis/connect-api.md)
 
 ## 配置 CONFIGURATION <a id="configuration"></a>
 
@@ -21,7 +24,8 @@
 
 ## 设计 DESIGN <a id="design"></a>
 
-* [Untitled](./design/untitled.md)
+* [动机 Motivation](./design/motivation.md)
+* [消息交付语义 Message Delivery Semantics](./design/message-delivery-semantics.md)
 
 ## 实现 IMPLEMENTATION <a id="implementation"></a>
 
@@ -33,7 +37,7 @@
 
 ## 安全 SECURITY <a id="security"></a>
 
-* [Untitled](./security/untitled.md)
+* [安全综述 Security Overview](./security/security-overview.md)
 
 ## KAFKA CONNECT
 

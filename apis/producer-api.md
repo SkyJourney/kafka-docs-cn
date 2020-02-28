@@ -1,4 +1,4 @@
-# 生产者API Producer API
+# 2.1 生产者API Producer API
 
 生产者`API`允许应用程序发送数据流到Kafka集群的主题中。
 
@@ -14,7 +14,7 @@
 </dependency>
 ```
 
-## 附：KafkaProducer javadocs示例翻译
+## 附：KafkaProducer javadocs示例翻译 <a id="kafkaproducer-javadocs"></a>
 
 ```java
 public class KafkaProducer<K,V>
@@ -48,7 +48,7 @@ public class KafkaProducer<K,V>
 
 `acks`配置项用来控制确认请求是否完成的条件。我们这里设定为`all`，会使得数据记录的完全提交阻塞，这是最慢但是最持久的设定。
 
-如果请求失败，生产者可以自动重试，当然如果当我们指定重试次数为`0`则不会。开启重试机制也会添加数据重复的可能性（有关详细信息请参阅[邮件传递语义](./../design/message-delivery-semantics.md)章节）。
+如果请求失败，生产者可以自动重试，当然如果当我们指定`retries`为`0`则不会。开启重试机制也会添加数据重复的可能性（有关详细信息请参阅[消息交付语义](./../design/message-delivery-semantics.md)章节）。
 
 生产者为每个分区维护未发送数据记录的缓冲区。这些缓冲区的大小由`batch.size`配置项指定。扩大缓冲区的大小可以进行更多的批处理，但同时也会需要更多的内存（因为我们通常会为每个活动的分区从这些缓冲区中分配一个）
 
@@ -56,19 +56,19 @@ public class KafkaProducer<K,V>
 
 `buffer.memory`配置项用来控制生产者可用于缓冲区的内存总量。如果数据记录发到生产者的速度超过了记录发送给服务器的速度，则缓冲区空间将会被耗尽，此时后续对生产者的发送调用会被阻塞。阻塞时间的阈值由`max.block.ms`设定。若超过此时间则抛出`TimeoutException`异常。
 
+`key.serializer`和`value.serializer`指定如何将用户通过其ProducerRecord提供的键和值对象序列化为字节数据。您可以将随附的`ByteArraySerializer`或`StringSerializer`用于简单的字节数组或字符串类型。
 
+从`Kafka 0.11`开始，`KafkaProducer`支持两种附加模式：幂等生产者和事务生产者。幂等生产者增强了`Kafka`的交付语义从至少一次交付到精确地一次交付。特别是生产者重试机制将不再引入重复项。事务生产者运行应用程序原子性地发送消息到多个分区（和主题）。
 
-The key.serializer and value.serializer instruct how to turn the key and value objects the user provides with their ProducerRecord into bytes. You can use the included ByteArraySerializer or StringSerializer for simple string or byte types.
+要启用幂等模式，`enable.idempotence`不行设置为`true`。一旦设定，`retries`设定会默认为`Integer.MAX_VALUE`，`acks`设定默认为`all`。对幂等模式不会有任何`API`的改变，所以已有的应用程序无需做任何改变就可以获得该功能的特性。
 
-From Kafka 0.11, the KafkaProducer supports two additional modes: the idempotent producer and the transactional producer. The idempotent producer strengthens Kafka's delivery semantics from at least once to exactly once delivery. In particular producer retries will no longer introduce duplicates. The transactional producer allows an application to send messages to multiple partitions (and topics!) atomically.
+要利用幂等生产者的优势，米边应用级别的重新发送是必须的，因为这些重复发送无法被去重删除。因此，如果一个应用程序开启了幂等模式，推荐不要设置`retries`，因为它默认会被设定为`Integer.MAX_VALUE`。此外，如果`send（ProducerRecord）`方法即使无线重试（例如，如果消息在发送之前在缓冲区中过期）依然返回错误，则建议关闭生产者并检查最后生产的消息以确保其没有重复。最后，生产者只能保证在单个回话中发送的消息具有幂等性。
 
-To enable idempotence, the enable.idempotence configuration must be set to true. If set, the retries config will default to Integer.MAX_VALUE and the acks config will default to all. There are no API changes for the idempotent producer, so existing applications will not need to be modified to take advantage of this feature.
+要使用事务生产者和其附带的`APIs`，你不许设置`transactional.id`配置项。一旦设定了`transactional.id`，幂等模式会被自动开启且幂等所以来的生产者设置会被自动设定。此外，事务中包含的主题应该被设定为持久性。特别是`replication.factor`应该被设定至少为`3`，并且这些主题的`min.insync.replicas`应该设定为`2`。最后，为了实现端对端的事务保证，消费者同样必须被设定为只读取已经提交的消息。
 
-To take advantage of the idempotent producer, it is imperative to avoid application level re-sends since these cannot be de-duplicated. As such, if an application enables idempotence, it is recommended to leave the retries config unset, as it will be defaulted to Integer.MAX_VALUE. Additionally, if a send(ProducerRecord) returns an error even with infinite retries (for instance if the message expires in the buffer before being sent), then it is recommended to shut down the producer and check the contents of the last produced message to ensure that it is not duplicated. Finally, the producer can only guarantee idempotence for messages sent within a single session.
+`transactional.id`配置是为了开启单个生产者在多个会话之间的事务恢复。它通常从分区的有状态的应用程序的分片标识符中派生。这样，它对于分区的应用程序中运行的每个生产者实例都应该是唯一的。
 
-To use the transactional producer and the attendant APIs, you must set the transactional.id configuration property. If the transactional.id is set, idempotence is automatically enabled along with the producer configs which idempotence depends on. Further, topics which are included in transactions should be configured for durability. In particular, the replication.factor should be at least 3, and the min.insync.replicas for these topics should be set to 2. Finally, in order for transactional guarantees to be realized from end-to-end, the consumers must be configured to read only committed messages as well.
-
-The purpose of the transactional.id is to enable transaction recovery across multiple sessions of a single producer instance. It would typically be derived from the shard identifier in a partitioned, stateful, application. As such, it should be unique to each producer instance running within a partitioned application.
+所有新的事务`API`都是阻塞的并且在失败时抛出异常。下面的实例会说明如何使用新的`API`。除了所有`100`条消息都是单个事务的一部分之外，它与上面的示例相似。
 
 All the new transactional APIs are blocking and will throw exceptions on failure. The example below illustrates how the new APIs are meant to be used. It is similar to the example above, except that all 100 messages are part of a single transaction.
 
@@ -94,10 +94,10 @@ All the new transactional APIs are blocking and will throw exceptions on failure
  }
  producer.close();
 ```
-As is hinted at in the example, there can be only one open transaction per producer. All messages sent between the beginTransaction() and commitTransaction() calls will be part of a single transaction. When the transactional.id is specified, all messages sent by the producer must be part of a transaction.
 
-The transactional producer uses exceptions to communicate error states. In particular, it is not required to specify callbacks for producer.send() or to call .get() on the returned Future: a KafkaException would be thrown if any of the producer.send() or transactional calls hit an irrecoverable error during a transaction. See the send(ProducerRecord) documentation for more details about detecting errors from a transactional send.
+如示例所示，每个生产者只能有一个打开的事务。所有在`beginTransaction()`和`commitTransaction()`调用之间发送的消息发将成为一个单个的事务。当`transactional.id`被指定时，生产者发送的所有消息都必须是事务的一部分。
 
-By calling producer.abortTransaction() upon receiving a KafkaException we can ensure that any successful writes are marked as aborted, hence keeping the transactional guarantees.
-This client can communicate with brokers that are version 0.10.0 or newer. Older or newer brokers may not support certain client features. For instance, the transactional APIs need broker versions 0.11.0 or later. You will receive an UnsupportedVersionException when invoking an API that is not available in the running broker version.
+事务生产者使用异常来传达错误状态。特别是不需要为`producer.send()`指定回调或在返回的`Future`对象上调用`.get()`：如果在事务过程中任何`producer.send()`或事务调用遇到不可恢复的错误，都将抛出`KafkaException`。有关从事务发送中检测错误的更多详细信息，请参见[`send(ProducerRecord)`](http://kafka.apache.org/24/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html#send-org.apache.kafka.clients.producer.ProducerRecord-)文档。
 
+通过在接收到`KafkaException`之后调用`producer.abortTransaction()`，我们可以确保将任何成功的写操作都标记为已中止，从而保证事务完整性。
+该客户端可以与`0.10.0`或更高版本的代理进行通信。较旧或较新的代理可能不支持某些客户端功能。例如，事务性`API`需要代理版本`0.11.0`或更高版本。 当调用正在运行的代理版本中不可用的`API`时，您将收到`UnsupportedVersionException`。
