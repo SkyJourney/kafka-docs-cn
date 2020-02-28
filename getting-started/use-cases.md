@@ -1,4 +1,4 @@
-# 1.2 用例示范 Use Cases
+# 用例示范 Use Cases
 
 本节是对`Apache Kafka®`的一些流行用例的描述。有关这些领域的概述，请参阅[此篇博客](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying/)。
 
@@ -28,7 +28,6 @@
 
 `Kafka`的许多用户在有多个阶段组成的处理管道中处理数据，其源输入数据从`Kafka`主题中消费，然后进行聚合，完善，或以其他方式转换为新主题供进一步消费或后续处理。例如用于推荐新闻文章的处理管道可能会从`RSS`源中抓取文章内容，然后发布到`articles`主题中；进一步处理可能会将文章内容规范化或去重，并将净化过的文章内容发布到一个新主题中；最后一步处理可能尝试给用户推荐这些内容。这样的处理管道基于各个独立的主题创建实时数据的流式图。从`0.10.0.0`版本开始，`Apache Kafka`中提供了一个轻量但功能强大的流处理库，称为`Kafka Streams`，可以执行上述的数据处理。除了`Kafka Streams`，其他开源的流处理工具还包括`Apache Storm`和`Apache Samza`。
 
-
 ## 事件获取 Event Sourcing
 
 事件获取是一种应用程序设计风格，指状态更改以数据记录的时间顺序被日志记录。 `Kafka`对大量存储的日志数据的支持使其成为使用这种样式构建的应用程序的绝佳后端。
@@ -36,3 +35,4 @@
 ## 提交日志 Commit Log
 
 `Kafka`可以用作分布式系统的一种外部提交日志。该日志有助于在节点之间复制数据，并充当故障节点恢复其数据的重新同步机制。 `Kafka`中的日志压缩功能能更好的支持此用法。在这种用法中，`Kafka`与`Apache BookKeeper`项目相似。
+

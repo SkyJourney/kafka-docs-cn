@@ -1,4 +1,4 @@
-# 2.1 生产者API Producer API
+# 生产者 API Producer API
 
 生产者`API`允许应用程序发送数据流到Kafka集群的主题中。
 
@@ -6,7 +6,7 @@
 
 要使用生产者，可以使用以下`Maven`依赖项：
 
-```xml
+```markup
 <dependency>
     <groupId>org.apache.kafka</groupId>
     <artifactId>kafka-clients</artifactId>
@@ -40,7 +40,7 @@ public class KafkaProducer<K,V>
      producer.send(new ProducerRecord<String, String>("my-topic", Integer.toString(i), Integer.toString(i)));
 
  producer.close();
- ```
+```
 
 生产者由一个用来缓存尚未被发送到服务器的数据记录的缓存空间池和一个负责将这些记录转换为请求并将他们传输给集群的后台`I/O`线程组成。若不能在使用后正常关闭生产者，则这些资源会被泄漏。
 
@@ -48,7 +48,7 @@ public class KafkaProducer<K,V>
 
 `acks`配置项用来控制确认请求是否完成的条件。我们这里设定为`all`，会使得数据记录的完全提交阻塞，这是最慢但是最持久的设定。
 
-如果请求失败，生产者可以自动重试，当然如果当我们指定`retries`为`0`则不会。开启重试机制也会添加数据重复的可能性（有关详细信息请参阅[消息交付语义](./../design/message-delivery-semantics.md)章节）。
+如果请求失败，生产者可以自动重试，当然如果当我们指定`retries`为`0`则不会。开启重试机制也会添加数据重复的可能性（有关详细信息请参阅[消息交付语义](../design/message-delivery-semantics.md)章节）。
 
 生产者为每个分区维护未发送数据记录的缓冲区。这些缓冲区的大小由`batch.size`配置项指定。扩大缓冲区的大小可以进行更多的批处理，但同时也会需要更多的内存（因为我们通常会为每个活动的分区从这些缓冲区中分配一个）
 
@@ -99,5 +99,5 @@ All the new transactional APIs are blocking and will throw exceptions on failure
 
 事务生产者使用异常来传达错误状态。特别是不需要为`producer.send()`指定回调或在返回的`Future`对象上调用`.get()`：如果在事务过程中任何`producer.send()`或事务调用遇到不可恢复的错误，都将抛出`KafkaException`。有关从事务发送中检测错误的更多详细信息，请参见[`send(ProducerRecord)`](http://kafka.apache.org/24/javadoc/org/apache/kafka/clients/producer/KafkaProducer.html#send-org.apache.kafka.clients.producer.ProducerRecord-)文档。
 
-通过在接收到`KafkaException`之后调用`producer.abortTransaction()`，我们可以确保将任何成功的写操作都标记为已中止，从而保证事务完整性。
-该客户端可以与`0.10.0`或更高版本的代理进行通信。较旧或较新的代理可能不支持某些客户端功能。例如，事务性`API`需要代理版本`0.11.0`或更高版本。 当调用正在运行的代理版本中不可用的`API`时，您将收到`UnsupportedVersionException`。
+通过在接收到`KafkaException`之后调用`producer.abortTransaction()`，我们可以确保将任何成功的写操作都标记为已中止，从而保证事务完整性。 该客户端可以与`0.10.0`或更高版本的代理进行通信。较旧或较新的代理可能不支持某些客户端功能。例如，事务性`API`需要代理版本`0.11.0`或更高版本。 当调用正在运行的代理版本中不可用的`API`时，您将收到`UnsupportedVersionException`。
+

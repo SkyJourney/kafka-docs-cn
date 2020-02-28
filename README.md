@@ -16,5 +16,3 @@
 
 [分布式发布订阅消息系统 Kafka 架构设计](https://www.oschina.net/translate/kafka-design)
 
-
-

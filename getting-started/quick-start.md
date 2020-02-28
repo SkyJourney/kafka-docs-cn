@@ -1,4 +1,4 @@
-# 1.3 快速入门 Quick Start
+# 快速入门 Quick Start
 
 该教程假定读者是从头开始，并且没有现有的`Kafka`或`ZooKeeper`数据。`Kafka`控制台脚本在基于`Unix`的平台和`Windows`平台有所出入，因此在`Windows`平台使用`bin\windows\`而不是`bin/`，并且脚本扩展名改为`.bat`。
 
@@ -91,7 +91,7 @@ config/server-1.properties:
     broker.id=1
     listeners=PLAINTEXT://:9093
     log.dirs=/tmp/kafka-logs-1
- 
+
 config/server-2.properties:
     broker.id=2
     listeners=PLAINTEXT://:9094
@@ -151,8 +151,7 @@ my test message 2
 ^C
 ```
 
-现在我们来消费这些消息：
-Now let's consume these messages:
+现在我们来消费这些消息： Now let's consume these messages:
 
 ```bash
 > bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic
@@ -251,6 +250,7 @@ The connectors continue to process data, so we can add data to the file and see 
 
 您应该看到该行出现在控制台使用者输出和接收器文件中。
 
-## 步骤8：用 Kafka Streams 处理数据 Use Kafka Streams to process data  <a id="streams-process-data"></a>
+## 步骤8：用 Kafka Streams 处理数据 Use Kafka Streams to process data <a id="streams-process-data"></a>
 
-`Kafka Streams`是用于构建关键任务实时应用程序和微服务的客户端库，其中输入和/或输出数据存储在`Kafka`集群中。 `Kafka Streams`结合了在客户端编写和部署标准Java和Scala应用程序的简便性以及`Kafka`服务器端集群技术的优势，使这些应用程序具有高度可伸缩性，弹性，容错性，分布式等特性。此[快速入门示例](../kafka-streams/quick-start.md)将演示如何运行此库中编码的流应用程序。
+`Kafka Streams`是用于构建关键任务实时应用程序和微服务的客户端库，其中输入和/或输出数据存储在`Kafka`集群中。 `Kafka Streams`结合了在客户端编写和部署标准Java和Scala应用程序的简便性以及`Kafka`服务器端集群技术的优势，使这些应用程序具有高度可伸缩性，弹性，容错性，分布式等特性。此[快速入门示例](https://github.com/SkyJourney/kafka-docs-cn/tree/265103ae9192e2ccdca46e897ef3a6f8b3d37f37/kafka-streams/quick-start.md)将演示如何运行此库中编码的流应用程序。
+
