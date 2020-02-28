@@ -1,4 +1,4 @@
-# 快速入门 Quick Start
+# 1.3 快速入门 Quick Start
 
 该教程假定读者是从头开始，并且没有现有的`Kafka`或`ZooKeeper`数据。`Kafka`控制台脚本在基于`Unix`的平台和`Windows`平台有所出入，因此在`Windows`平台使用`bin\windows\`而不是`bin/`，并且脚本扩展名改为`.bat`。
 

@@ -1,4 +1,4 @@
-# 用例示范 Use Cases
+# 1.2 用例示范 Use Cases
 
 本节是对`Apache Kafka®`的一些流行用例的描述。有关这些领域的概述，请参阅[此篇博客](https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying/)。
 
